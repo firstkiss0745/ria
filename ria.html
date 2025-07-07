@@ -1,0 +1,2145 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <title>ระบบเบิกกระดาษ RIA Group</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- SweetAlert2 -->
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+
+    <style>
+        .btn-primary {
+            background: #2563eb;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+            color: #fff;
+        }
+
+        .btn-secondary:hover {
+            opacity: 0.9;
+        }
+
+        .btn-success {
+            background: #22c55e;
+            color: #fff;
+        }
+
+        .btn-success:hover {
+            opacity: 0.9;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: #fff;
+        }
+
+        .btn-danger:hover {
+            opacity: 0.9;
+        }
+
+        .card {
+            background: #fff;
+        }
+    </style>
+</head>
+
+<body class="bg-gradient-to-br from-blue-600 to-indigo-900 min-h-screen overflow-x-hidden">
+    <div class="flex min-h-screen w-full">
+        <!-- Sidebar -->
+        <aside id="sidebar"
+            class="w-72 bg-white shadow-xl rounded-xl border border-gray-200 p-6 min-h-screen flex flex-col justify-between hidden">
+            <div>
+                <div class="text-center py-4 mb-6">
+                    <img src="https://i.postimg.cc/yJHTv3zM/logo.png" alt="RIA Group Logo"
+                        class="w-16 h-16 mx-auto mb-2 rounded-xl shadow" />
+                    <div class="text-gray-900 font-bold text-lg tracking-wide">RIA Group</div>
+                </div>
+                <nav class="flex flex-col gap-2">
+                    <div>
+                        <a href="#" onclick="showPage('dashboard')"
+                            class="nav-item flex items-center gap-3 p-3 rounded-xl text-gray-900 font-semibold hover:bg-gray-100 transition-all duration-150">
+                            <span class="text-2xl">🏠</span>
+                            <span>Dashboard</span>
+                        </a>
+                    </div>
+                    <div>
+                        <a href="#" onclick="showPage('addPaperType')"
+                            class="nav-item flex items-center gap-3 p-3 rounded-xl text-gray-900 font-semibold hover:bg-gray-100 transition-all duration-150">
+                            <span class="text-2xl">🔼</span>
+                            <span>เพิ่มประเภทกระดาษ</span>
+                        </a>
+                    </div>
+                    <div>
+                        <a href="#" onclick="showPage('usage')"
+                            class="nav-item flex items-center gap-3 p-3 rounded-xl text-gray-900 font-semibold hover:bg-gray-100 transition-all duration-150">
+                            <span class="text-2xl">💸</span>
+                            <span>บันทึกการเบิก</span>
+                        </a>
+                    </div>
+                    <div>
+                        <a href="#" onclick="showPage('addUser')"
+                            class="nav-item flex items-center gap-3 p-3 rounded-xl text-gray-900 font-semibold hover:bg-gray-100 transition-all duration-150">
+                            <span class="text-2xl">➕</span>
+                            <span>เพิ่มผู้ใช้งาน</span>
+                        </a>
+                    </div>
+                    <div>
+                        <a href="#" onclick="showPage('approval')"
+                            class="nav-item flex items-center gap-3 p-3 rounded-xl text-gray-900 font-semibold hover:bg-gray-100 transition-all duration-150">
+                            <span class="text-2xl">🛂</span>
+                            <span>ระบบอนุมัติ</span>
+                        </a>
+                    </div>
+                    <div>
+                        <a href="#" onclick="showPage('report')"
+                            class="nav-item flex items-center gap-3 p-3 rounded-xl text-gray-900 font-semibold hover:bg-gray-100 transition-all duration-150">
+                            <span class="text-2xl">📊</span>
+                            <span>รายงานการเบิก</span>
+                        </a>
+                    </div>
+                    <div>
+                        <a href="#" onclick="showPage('manageStock')"
+                            class="nav-item flex items-center gap-3 p-3 rounded-xl text-gray-900 font-semibold hover:bg-gray-100 transition-all duration-150">
+                            <span class="text-2xl">📦</span>
+                            <span>จัดการกระดาษคงเหลือ</span>
+                        </a>
+                    </div>
+                    <div>
+                        <a href="#" onclick="showPage('news')"
+                            class="nav-item flex items-center gap-3 p-3 rounded-xl text-gray-900 font-semibold hover:bg-gray-100 transition-all duration-150">
+                            <span class="text-2xl">📢</span>
+                            <span>จัดการข่าวประกาศ</span>
+                        </a>
+                    </div>
+                </nav>
+
+            </div>
+            <div class="bg-gray-50 p-4 rounded-lg text-sm text-gray-900 mt-10">
+                <div>ผู้ใช้งาน: <span id="currentUser">-</span></div>
+                <div>สิทธิ์: <span id="currentRole">-</span></div>
+                <button onclick="logout()"
+                    class="mt-3 w-full text-xs bg-red-500 px-3 py-2 rounded font-bold text-white hover:bg-red-600 transition-all">ออกจากระบบ</button>
+            </div>
+        </aside>
+
+
+        <!-- Main Content -->
+
+        <main id="mainContent" class="flex-1 p-6 md:p-10 overflow-y-auto max-w-full overflow-x-auto">
+            <!-- News Page -->
+            <div id="newsPage" class="hidden">
+                <div class="card p-8 rounded-xl shadow-lg max-w-2xl mx-auto my-8">
+                    <h2 class="text-xl font-bold mb-4">จัดการข่าวประกาศ</h2>
+                    <form onsubmit="submitNewsForm(event)">
+                        <div class="mb-3">
+                            <label class="block font-semibold mb-1">หัวข้อข่าว</label>
+                            <input type="text" id="newsTitle" class="w-full border rounded p-2" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="block font-semibold mb-1">เนื้อหา</label>
+                            <textarea id="newsContent" class="w-full border rounded p-2" required></textarea>
+                        </div>
+                        <button type="submit" class="btn-primary px-4 py-2 rounded">เพิ่มข่าว</button>
+                    </form>
+                    <hr class="my-6">
+                    <h3 class="text-lg font-bold mb-2">ข่าวประกาศล่าสุด</h3>
+                    <div id="newsList"></div>
+                </div>
+            </div>
+
+            <!-- Manage Stock Page -->
+            <div id="manageStockPage" class="hidden">
+                <div class="card p-8 rounded-xl shadow-lg max-w-2xl mx-auto my-8">
+                    <h2 class="text-xl font-bold mb-4">จัดการกระดาษคงเหลือ</h2>
+                    <form onsubmit="addPaperStock(event)">
+                        <div class="mb-3">
+                            <label class="block font-semibold mb-1">เลือกประเภทกระดาษ</label>
+                            <select id="stockPaperType" class="w-full border rounded p-2" required>
+                                <option value="">-- เลือกประเภทกระดาษ --</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="block font-semibold mb-1">จำนวนที่ต้องการเพิ่ม (+ หรือ - ได้)</label>
+                            <input type="number" id="stockChangeAmount" class="w-full border rounded p-2" required>
+                        </div>
+                        <button type="submit" class="btn-success px-4 py-2 rounded">อัปเดตจำนวน</button>
+                    </form>
+                    <hr class="my-6">
+                    <h3 class="text-lg font-bold mb-2">ยอดคงเหลือปัจจุบัน</h3>
+                    <div id="currentStockList"></div>
+                </div>
+            </div>
+
+            <!-- Login Page -->
+            <div id="loginPage" class="max-w-md mx-auto mt-20">
+                <div class="card rounded-2xl shadow-2xl p-8">
+                    <div class="text-center mb-6">
+                        <img src="https://i.postimg.cc/yJHTv3zM/logo.png" alt="RIA Group Logo"
+                            class="w-20 h-20 mx-auto mb-4 rounded-xl">
+                        <h2 class="text-2xl font-bold text-gray-800">เข้าสู่ระบบ</h2>
+                        <p class="text-gray-600">ระบบบริหารจัดการการเบิกกระดาษ</p>
+                    </div>
+                    <form onsubmit="login(event)">
+                        <div class="mb-4">
+                            <label class="block text-gray-700 text-sm font-bold mb-2">ชื่อผู้ใช้</label>
+                            <input type="text" id="loginUsername"
+                                class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500"
+                                required>
+                        </div>
+                        <div class="mb-6">
+                            <label class="block text-gray-700 text-sm font-bold mb-2">รหัสผ่าน</label>
+                            <input type="password" id="loginPassword"
+                                class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500"
+                                required>
+                        </div>
+                        <button type="submit"
+                            class="btn-primary w-full text-white font-bold py-2 px-4 rounded-lg hover:opacity-90 transition-all">
+                            เข้าสู่ระบบ
+                        </button>
+                    </form>
+                    <div class="mt-4 text-sm text-gray-600">
+                        <p>หากไม่สามารถเข้าสู่ระบบได้ให้ทำการติดต่อADMIN</p>
+                    </div>
+                </div>
+            </div>
+            <!-- Dashboard Page -->
+            <div id="dashboardPage" class="hidden">
+                <div class="mb-8">
+                    <h1 class="text-3xl font-bold text-white mb-2">ระบบบริหารจัดการการเบิกกระดาษภายในองค์กร RIA Group
+                    </h1>
+                    <p class="text-blue-100">ยินดีต้อนรับสู่ระบบจัดการการเบิกกระดาษ</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="card rounded-xl p-6 shadow-lg">
+                        <div class="flex items-center">
+                            <div class="bg-blue-500 p-3 rounded-full mr-4">
+                                <span class="text-white text-xl">📄</span>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-800">การเบิกวันนี้</h3>
+                                <p class="text-2xl font-bold text-blue-600" id="todayUsage">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card rounded-xl p-6 shadow-lg">
+                        <div class="flex items-center">
+                            <div class="bg-green-500 p-3 rounded-full mr-4">
+                                <span class="text-white text-xl">📦</span>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-800">กระดาษคงเหลือ</h3>
+                                <p class="text-2xl font-bold text-green-600" id="remainingPaper">1000</p>
+                                <div id="manageStockList"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card rounded-xl p-6 shadow-lg">
+                        <div class="flex items-center">
+                            <div class="bg-orange-500 p-3 rounded-full mr-4">
+                                <span class="text-white text-xl">⏳</span>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-800">รออนุมัติ</h3>
+                                <p class="text-2xl font-bold text-orange-600" id="pendingRequests">0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="card rounded-xl p-6 shadow-lg">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">การเบิกตามประเภท</h3>
+                        <canvas id="paperTypeChart" class="h-56" style="max-height:300px;"></canvas>
+                    </div>
+                    <div class="card rounded-xl p-6 shadow-lg">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">ข่าวประกาศ</h3>
+                        <div id="dashboardNews"></div>
+                        <div class="space-y-3">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Add Paper Type Page -->
+            <div id="addPaperTypePage" class="hidden">
+                <div class="card p-8 rounded-xl shadow-lg max-w-lg mx-auto my-8">
+                    <h2 class="text-xl font-bold mb-4">เพิ่มประเภทกระดาษ</h2>
+                    <form onsubmit="addPaperType(event)">
+                        <div class="mb-3">
+                            <label class="block font-semibold mb-1">ชื่อประเภทกระดาษ</label>
+                            <input type="text" id="paperTypeName" class="w-full border rounded p-2" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="block font-semibold mb-1">คำอธิบาย</label>
+                            <textarea id="paperTypeDescription" class="w-full border rounded p-2"></textarea>
+                        </div>
+                        <button type="submit" class="btn-primary px-4 py-2 rounded">บันทึก</button>
+                    </form>
+                    <hr class="my-6">
+                    <h3 class="text-lg font-bold mb-2">รายการประเภทกระดาษ</h3>
+                    <div id="currentPaperTypes"></div>
+                </div>
+            </div>
+            <!-- Usage Page -->
+            <div id="usagePage" class="hidden">
+                <div class="card p-8 rounded-xl shadow-lg max-w-lg mx-auto my-8">
+                    <h2 class="text-xl font-bold mb-4">บันทึกการเบิกกระดาษ</h2>
+                    <form onsubmit="submitUsageRequest(event)">
+                        <div class="mb-3">
+                            <label class="block font-semibold mb-1">ตัวแทนผู้เบิก</label>
+                            <input type="text" id="requestUserName" class="w-full border rounded p-2" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="block font-semibold mb-1">แผนก</label>
+                            <input type="text" id="requestDepartment" class="w-full border rounded p-2" readonly>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="block font-semibold mb-1">ประเภทกระดาษ</label>
+                            <select id="requestPaperType" class="w-full border rounded p-2" required></select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="block font-semibold mb-1">จำนวน (รีม/ชุด)</label>
+                            <input type="number" id="requestQuantity" class="w-full border rounded p-2" min="1"
+                                required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="block font-semibold mb-1">หมายเหตุ</label>
+                            <textarea id="requestNote" class="w-full border rounded p-2"></textarea>
+                        </div>
+                        <button type="submit" class="btn-success px-4 py-2 rounded">ส่งคำขอเบิก</button>
+                    </form>
+                </div>
+            </div>
+            <!-- Add User Page -->
+            <div id="addUserPage" class="card p-8 rounded-xl shadow-lg max-w-lg mx-auto my-8 bg-white hidden">
+                <h2 class="text-xl font-bold mb-4">เพิ่มผู้ใช้งาน</h2>
+                <form onsubmit="addUser(event)">
+                    <div class="mb-3">
+                        <label class="block font-semibold mb-1">ชื่อ-นามสกุล</label>
+                        <input type="text" id="userName"
+                            class="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                            required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="block font-semibold mb-1">แผนก</label>
+                        <input type="text" id="userDepartment"
+                            class="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                            required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="block font-semibold mb-1">Username</label>
+                        <input type="text" id="userUsername"
+                            class="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                            required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="block font-semibold mb-1">Password</label>
+                        <input type="password" id="userPassword"
+                            class="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                            required>
+                    </div>
+                    <div class="mb-6">
+                        <label class="block font-semibold mb-1">สิทธิ์</label>
+                        <select id="userRole"
+                            class="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                            required>
+                            <option value="">เลือกสิทธิ์</option>
+                            <option value="User">User</option>
+                            <option value="Admin">Admin</option>
+                        </select>
+                    </div>
+                    <button type="submit"
+                        class="bg-indigo-600 text-white font-semibold px-5 py-2 rounded-lg shadow hover:bg-indigo-700 transition-all">
+                        เพิ่มผู้ใช้งาน
+                    </button>
+                </form>
+            </div>
+
+
+            <!-- Approval Page -->
+            <div id="approvalPage" class="hidden">
+                <div class="card p-8 rounded-xl shadow-lg max-w-2xl mx-auto my-8">
+                    <h2 class="text-xl font-bold mb-4">ระบบอนุมัติการเบิก</h2>
+                    <div id="pendingRequestsList"></div>
+                    <hr class="my-6">
+                    <h3 class="text-lg font-bold mb-2">รายการที่อนุมัติแล้ว</h3>
+                    <div id="approvedRequestsList"></div>
+                </div>
+            </div>
+            <!-- Report Page -->
+            <div id="reportPage" class="hidden">
+                <div class="card p-8 rounded-xl shadow-lg max-w-4xl mx-auto my-8">
+                    <h2 class="text-xl font-bold mb-4">รายงานการเบิกกระดาษ</h2>
+                    <div class="mb-4">
+                        <select id="statusFilter" class="border rounded p-2" onchange="loadReportData()">
+                            <option value="All">ทั้งหมด</option>
+                            <option value="Approved">อนุมัติ</option>
+                            <option value="Pending">รออนุมัติ</option>
+                            <option value="Rejected">ไม่อนุมัติ</option>
+                        </select>
+                    </div>
+                    <div id="reportData"></div>
+                    <div class="my-8">
+                        <canvas id="reportChart" class="h-56" style="max-height:300px;"></canvas>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script>
+        // Global variables
+        let currentUser = null;
+        let currentRole = null;
+        let users = [];
+        let paperTypes = [];
+        let usageRequests = [];
+
+        // Google Sheets Configuration
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzgAcZ4Q4tDrXOP82C_twnhp1veUUUptt5E7NnfReo35fS8Bzlc0lMD9YRLe2_RrtzS/exec';
+
+        // Google Sheets Structure:
+        // Sheet 1: "Users" - columns: ID, Name, Department, Role, CreatedAt
+        // Sheet 2: "PaperTypes" - columns: ID, Name, Description, CreatedAt
+        // Sheet 3: "UsageRequests" - columns: ID, UserID, UserName, Department, PaperTypeID, PaperTypeName, Quantity, Note, Status, RequestDate, RequestedBy, ApprovedBy, ApprovedDate, RejectedBy, RejectedDate, RejectionReason, WithdrawnStatus, WithdrawnDate, WithdrawnBy
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function () {
+            // โหลดจาก cache ก่อน (เร็ว)
+            if (localStorage.getItem('users')) users = JSON.parse(localStorage.getItem('users'));
+            if (localStorage.getItem('paperTypes')) paperTypes = JSON.parse(localStorage.getItem('paperTypes'));
+            if (localStorage.getItem('usageRequests')) usageRequests = JSON.parse(localStorage.getItem('usageRequests'));
+
+            checkLoginStatus();    // ✅ render dashboard/sidebar จาก localStorage ทันที
+
+            updateDashboard();     // ✅ ข้อมูลจาก cache
+
+            // fetch ข้อมูลสด async อัพเดต cache/UI ทีหลัง
+            loadUsersFromSheet(() => {
+                checkLoginStatus(); // ถ้า users สดเปลี่ยน จะเช็คอีกที
+            });
+            loadPaperTypesFromSheet(updateDashboard);
+            loadUsageRequestsFromSheet(updateDashboard);
+        });
+
+
+
+
+        // Authentication functions
+        // 1. login event (ใน <form onsubmit="login(event)">)
+        async function login(event) {
+            event.preventDefault();
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+            await checkLogin(username, password); // <-- เรียกแบบ async!
+        }
+
+        // 2. checkLogin ใช้ได้เลย
+        async function checkLogin(username, password) {
+            const passwordHash = await hashPassword(password);
+            const found = users.find(u => u.username === username && u.passwordHash === passwordHash);
+            if (found) {
+                currentUser = found.username;
+                currentRole = found.role;
+                localStorage.setItem('currentUser', currentUser);
+                localStorage.setItem('currentRole', currentRole);
+                updateUserDisplay();
+                showMainApp();
+                showPage('dashboard');
+                Swal.fire({
+                    icon: 'success',
+                    title: 'เข้าสู่ระบบสำเร็จ',
+                    text: `ยินดีต้อนรับ ${currentUser}`,
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'เข้าสู่ระบบไม่สำเร็จ',
+                    text: 'ชื่อผู้ใช้หรือรหัสผ่านผิด'
+                });
+            }
+        }
+
+
+        function logout() {
+            localStorage.removeItem('currentUser');
+            localStorage.removeItem('currentRole');
+            currentUser = null;
+            currentRole = null;
+
+            // ซ่อน sidebar ด้วย id="sidebar"
+            document.getElementById('sidebar').classList.add('hidden');
+
+            // แสดงเฉพาะ loginPage
+            document.getElementById('loginPage').classList.remove('hidden');
+            document.querySelectorAll('[id$="Page"]').forEach(page => {
+                if (page.id !== 'loginPage') page.classList.add('hidden');
+            });
+        }
+
+
+
+
+        function checkLoginStatus() {
+            currentUser = localStorage.getItem('currentUser');
+            currentRole = localStorage.getItem('currentRole');
+            // ใช้ users จาก cache ก่อน (อย่ารอ users สดจาก google sheet)
+            if (currentUser && currentRole && users.some(u => u.username === currentUser && u.role === currentRole)) {
+                document.getElementById('sidebar').classList.remove('hidden');
+                document.getElementById('loginPage').classList.add('hidden');
+                document.getElementById('dashboardPage').classList.remove('hidden');
+                updateUserDisplay();
+            } else {
+                localStorage.removeItem('currentUser');
+                localStorage.removeItem('currentRole');
+                document.getElementById('sidebar').classList.add('hidden');
+                document.getElementById('loginPage').classList.remove('hidden');
+            }
+        }
+
+
+
+
+
+        function updateUserDisplay() {
+            document.getElementById('currentUser').textContent = currentUser || '-';
+            document.getElementById('currentRole').textContent = currentRole || '-';
+
+            // Show/hide menus based on role
+            if (currentRole === 'Admin') {
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.parentElement.classList.remove('hidden');
+                });
+            } else {
+                // User can only see Dashboard and Usage Page
+                const allowedMenus = ['dashboard', 'usage'];
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    const onclick = item.getAttribute('onclick');
+                    if (onclick) {
+                        const pageId = onclick.match(/showPage\('(.+?)'\)/);
+                        if (pageId && !allowedMenus.includes(pageId[1])) {
+                            item.parentElement.classList.add('hidden');
+                        } else {
+                            item.parentElement.classList.remove('hidden');
+                        }
+                    }
+                });
+            }
+        }
+
+
+        function showMainApp() {
+            document.getElementById('loginPage').classList.add('hidden');
+            document.getElementById('sidebar').classList.remove('hidden');
+        }
+
+        // Navigation functions
+        function showPage(pageId) {
+            // Hide all pages
+            document.querySelectorAll('[id$="Page"]').forEach(page => {
+                page.classList.add('hidden');
+            });
+
+            // Show selected page
+            document.getElementById(pageId + 'Page').classList.remove('hidden');
+
+            // Load page-specific data
+            switch (pageId) {
+                case 'dashboard':
+                    updateDashboard();
+                    break;
+                case 'addPaperType':
+                    loadPaperTypesFromSheet(loadCurrentPaperTypes);
+                    loadCurrentStock();
+                    break;
+
+                case 'usage':
+                    loadUsersForDropdown();
+                    loadPaperTypesForDropdown();
+                    autofillUserInfo();
+                    break;
+                case 'addUser':
+                    loadUsersFromSheet();
+                    break;
+                case 'approval':
+                    if (currentRole !== 'Admin') {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'ไม่มีสิทธิ์เข้าถึง',
+                            text: 'เฉพาะผู้ดูแลระบบเท่านั้นที่สามารถเข้าถึงหน้านี้ได้'
+                        });
+                        showPage('dashboard');
+                        return;
+                    }
+                    loadUsageRequestsFromSheet(function () {
+                        loadPendingRequests();
+                        loadApprovedRequests();
+                    });
+                    break;
+                case 'report':
+                    if (currentRole !== 'Admin') {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'ไม่มีสิทธิ์เข้าถึง',
+                            text: 'เฉพาะผู้ดูแลระบบเท่านั้นที่สามารถเข้าถึงหน้านี้ได้'
+                        });
+                        showPage('dashboard');
+                        return;
+                    }
+                    loadUsageRequestsFromSheet(function () {
+                        loadReportData();
+                    });
+                    break;
+                case 'manageStock':
+                    loadPaperTypesFromSheet(function () {
+                        renderStockDropdown();
+                        loadCurrentStock();
+                    });
+                    break;
+                case 'news':
+                    loadNews(); // <-- เพิ่มบรรทัดนี้
+                    break;
+
+            }
+        }
+
+
+        // Data management functions
+        function initializeDefaultData() {
+            if (!localStorage.getItem('users')) {
+                users = [
+                    { id: 1, name: 'นายสมชาย ใจดี', department: 'IT', role: 'Admin' },
+                    { id: 2, name: 'นางสาวสมหญิง รักงาน', department: 'HR', role: 'User' },
+                    { id: 3, name: 'นายสมศักดิ์ ขยัน', department: 'Finance', role: 'User' }
+                ];
+                saveToLocalStorage();
+            }
+
+            if (!localStorage.getItem('paperTypes')) {
+                paperTypes = [
+                    { id: 1, name: 'A4 80g', description: 'กระดาษ A4 ขาว 80 แกรม' },
+                    { id: 2, name: 'A3 80g', description: 'กระดาษ A3 ขาว 80 แกรม' },
+                    { id: 3, name: 'A4 สี', description: 'กระดาษ A4 สีต่างๆ' }
+                ];
+                saveToLocalStorage();
+            }
+        }
+
+        function loadFromLocalStorage() {
+            const savedUsers = localStorage.getItem('users');
+            const savedPaperTypes = localStorage.getItem('paperTypes');
+            const savedUsageRequests = localStorage.getItem('usageRequests');
+
+            if (savedUsers) users = JSON.parse(savedUsers);
+            if (savedPaperTypes) paperTypes = JSON.parse(savedPaperTypes);
+            if (savedUsageRequests) usageRequests = JSON.parse(savedUsageRequests);
+        }
+
+        function saveToLocalStorage() {
+            localStorage.setItem('users', JSON.stringify(users));
+            localStorage.setItem('paperTypes', JSON.stringify(paperTypes));
+            localStorage.setItem('usageRequests', JSON.stringify(usageRequests));
+        }
+
+        // Google Sheets integration
+        function sendToGoogleSheet(data, callback) {
+            Swal.fire({
+                title: 'กำลังส่งข้อมูล...',
+                text: 'กรุณารอสักครู่',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            // Create JSONP callback
+            const callbackName = 'jsonp_callback_' + Math.round(100000 * Math.random());
+            window[callbackName] = function (response) {
+                delete window[callbackName];
+                document.body.removeChild(script);
+
+                Swal.close();
+                if (callback) callback(response);
+            };
+
+            // Create script element for JSONP
+            const script = document.createElement('script');
+            const params = new URLSearchParams(data);
+            params.append('callback', callbackName);
+            script.src = GOOGLE_SCRIPT_URL + '?' + params.toString();
+
+            script.onerror = function () {
+                delete window[callbackName];
+                document.body.removeChild(script);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'เกิดข้อผิดพลาด',
+                    text: 'ไม่สามารถเชื่อมต่อกับ Google Sheets ได้'
+                });
+            };
+
+            document.body.appendChild(script);
+        }
+
+        function loadFromGoogleSheet(sheetName, callback) {
+            // Swal.fire({
+            //     title: 'กำลังโหลดข้อมูล...',
+            //     text: 'กรุณารอสักครู่',
+            //     allowOutsideClick: false,
+            //     didOpen: () => {
+            //         Swal.showLoading();
+            //     }
+            // });
+
+            const callbackName = 'jsonp_callback_' + Math.round(100000 * Math.random());
+            window[callbackName] = function (response) {
+                delete window[callbackName];
+                document.body.removeChild(script);
+
+                Swal.close();
+                if (callback) callback(response);
+            };
+
+            const script = document.createElement('script');
+            script.src = GOOGLE_SCRIPT_URL + '?action=read&sheet=' + sheetName + '&callback=' + callbackName;
+
+            script.onerror = function () {
+                delete window[callbackName];
+                document.body.removeChild(script);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'เกิดข้อผิดพลาด',
+                    text: 'ไม่สามารถโหลดข้อมูลจาก Google Sheets ได้'
+                });
+            };
+
+            document.body.appendChild(script);
+        }
+
+        // Paper Type functions
+        function addPaperType(event) {
+            event.preventDefault();
+
+            const name = document.getElementById('paperTypeName').value.trim();
+            const description = document.getElementById('paperTypeDescription').value.trim();
+
+            if (!name) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'กรุณากรอกข้อมูล',
+                    text: 'โปรดระบุชื่อประเภทกระดาษ'
+                });
+                return;
+            }
+
+            // Check if paper type already exists
+            const existingType = paperTypes.find(type => type.name.toLowerCase() === name.toLowerCase());
+            if (existingType) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'ประเภทกระดาษซ้ำ',
+                    text: 'ประเภทกระดาษนี้มีอยู่ในระบบแล้ว'
+                });
+                return;
+            }
+
+            const newPaperType = {
+                id: Date.now(),
+                name: name,
+                description: description,
+                createdAt: new Date().toISOString()
+            };
+
+            // Save to local storage
+            paperTypes.push(newPaperType);
+            saveToLocalStorage();
+
+            // Send to Google Sheets
+            const data = {
+                action: 'addPaperType',
+                name: name,
+                description: description,
+                createdAt: newPaperType.createdAt
+            };
+
+            sendToGoogleSheet(data, function (response) {
+                if (response && response.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'บันทึกสำเร็จ',
+                        text: 'เพิ่มประเภทกระดาษเรียบร้อยแล้ว'
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'บันทึกในระบบสำเร็จ',
+                        text: 'แต่ไม่สามารถส่งไป Google Sheets ได้'
+                    });
+                }
+
+                // Clear form and refresh display
+                clearPaperTypeForm();
+                loadCurrentPaperTypes();
+            });
+        }
+
+        function clearPaperTypeForm() {
+            document.getElementById('paperTypeName').value = '';
+            document.getElementById('paperTypeDescription').value = '';
+        }
+
+        function loadCurrentPaperTypes() {
+            const container = document.getElementById('currentPaperTypes');
+            if (!container) return;
+
+            container.innerHTML = '';
+
+            if (paperTypes.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-center py-4">ยังไม่มีประเภทกระดาษในระบบ</p>';
+                return;
+            }
+
+            paperTypes.forEach(type => {
+                const typeDiv = document.createElement('div');
+                typeDiv.className = 'bg-blue-50 border border-blue-200 p-3 rounded-lg flex justify-between items-start';
+                typeDiv.innerHTML = `
+                <div class="flex-1">
+                    <h4 class="font-semibold text-blue-800">${type.name}</h4>
+                    <p class="text-sm text-blue-600 mt-1">${type.description || 'ไม่มีคำอธิบาย'}</p>
+                    <p class="text-xs text-gray-500 mt-2">เพิ่มเมื่อ: ${new Date(type.createdAt).toLocaleDateString('th-TH')}</p>
+                </div>
+                <div class="ml-4 space-x-2">
+                    <button onclick="editPaperType(${type.id})" class="text-blue-600 hover:text-blue-800 text-sm">✏️ แก้ไข</button>
+                    <button onclick="deletePaperType(${type.id})" class="text-red-600 hover:text-red-800 text-sm">🗑️ ลบ</button>
+                </div>
+            `;
+                container.appendChild(typeDiv);
+            });
+        }
+
+        function editPaperType(typeId) {
+            const type = paperTypes.find(t => t.id === typeId);
+            if (!type) return;
+
+            Swal.fire({
+                title: 'แก้ไขประเภทกระดาษ',
+                html: `
+            <input id="editPaperTypeName" class="swal2-input" placeholder="ชื่อประเภทกระดาษ" value="${type.name}">
+            <textarea id="editPaperTypeDescription" class="swal2-textarea" placeholder="คำอธิบาย">${type.description || ''}</textarea>
+        `,
+                showCancelButton: true,
+                confirmButtonText: 'บันทึก',
+                cancelButtonText: 'ยกเลิก',
+                preConfirm: () => {
+                    const name = document.getElementById('editPaperTypeName').value.trim();
+                    const description = document.getElementById('editPaperTypeDescription').value.trim();
+                    if (!name) {
+                        Swal.showValidationMessage('กรุณาระบุชื่อประเภทกระดาษ');
+                        return false;
+                    }
+                    return { name, description };
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // อัปเดต LocalStorage
+                    type.name = result.value.name;
+                    type.description = result.value.description;
+                    saveToLocalStorage();
+                    loadCurrentPaperTypes();
+
+                    // ส่งไป Google Sheets
+                    sendToGoogleSheet({
+                        action: 'updatePaperType',
+                        id: type.id,
+                        name: type.name,
+                        description: type.description
+                    }, function (response) {
+                        if (response && response.success) {
+                            // โหลดข้อมูลล่าสุดจาก Google Sheet กลับมาอัปเดต
+                            loadPaperTypesFromSheet();
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'แก้ไขสำเร็จ',
+                                text: 'ข้อมูลประเภทกระดาษถูกแก้ไขเรียบร้อยแล้ว'
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'เกิดข้อผิดพลาด',
+                                text: 'ไม่สามารถแก้ไข Google Sheets ได้'
+                            });
+                        }
+                    });
+                }
+            });
+        }
+
+
+        function deletePaperType(typeId) {
+            const type = paperTypes.find(t => t.id === typeId);
+            if (!type) return;
+
+            Swal.fire({
+                title: 'ยืนยันการลบ',
+                text: `คุณต้องการลบประเภทกระดาษ "${type.name}" หรือไม่?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'ลบ',
+                cancelButtonText: 'ยกเลิก'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    sendToGoogleSheet({
+                        action: 'deletePaperType',
+                        id: typeId
+                    }, function (response) {
+                        if (response && response.success) {
+                            // ดึงข้อมูล PaperTypes จาก Google Sheets ใหม่หลังลบ
+                            loadPaperTypesFromSheet();
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'ลบสำเร็จ',
+                                text: 'ประเภทกระดาษถูกลบเรียบร้อยแล้ว'
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'เกิดข้อผิดพลาด',
+                                text: 'ไม่สามารถลบจาก Google Sheets ได้'
+                            });
+                        }
+                    });
+                }
+            });
+        }
+
+
+        function loadPaperTypesForStockDropdown() {
+            const select = document.getElementById('stockPaperType');
+            select.innerHTML = '<option value="">-- เลือกประเภทกระดาษ --</option>';
+            // กรณีใช้ paperTypes ใน localStorage
+            if (window.paperTypes && paperTypes.length > 0) {
+                paperTypes.forEach(type => {
+                    select.innerHTML += `<option value="${type.id}">${type.name}</option>`;
+                });
+            } else {
+                // กรณีโหลดจาก Google Sheets
+                loadFromGoogleSheet('PaperTypes', function (res) {
+                    if (res.success && res.data) {
+                        res.data.forEach(type => {
+                            select.innerHTML += `<option value="${type.ID || type.id}">${type.Name || type.name}</option>`;
+                        });
+                    }
+                });
+            }
+        }
+
+
+
+
+
+        // Usage functions
+        function loadUsersForDropdown() {
+            const select = document.getElementById('requestUser');
+            if (!select) return;
+
+            select.innerHTML = '<option value="">เลือกตัวแทนผู้เบิก</option>';
+
+            console.log('Loading users:', users);
+
+            users.filter(user => user.role === 'User').forEach(user => {
+                const option = document.createElement('option');
+                option.value = user.id;
+                option.textContent = user.name;
+                option.setAttribute('data-department', user.department);
+                select.appendChild(option);
+            });
+
+            // Add event listener for department auto-fill
+            select.onchange = function () {
+                const selectedOption = this.options[this.selectedIndex];
+                const department = selectedOption.getAttribute('data-department') || '';
+                const deptField = document.getElementById('requestDepartment');
+                if (deptField) {
+                    deptField.value = department;
+                }
+            };
+        }
+
+        // Paper withdrawal functions
+        function withdrawPaper(requestId) {
+            const request = usageRequests.find(req => req.id === requestId);
+            if (!request || request.status !== 'Approved') {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'ไม่สามารถเบิกได้',
+                    text: 'คำขอนี้ยังไม่ได้รับการอนุมัติ'
+                });
+                return;
+            }
+
+            if (request.withdrawnStatus === 'Withdrawn') {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'เบิกแล้ว',
+                    text: 'คำขอนี้ได้ทำการเบิกไปแล้ว'
+                });
+                return;
+            }
+
+            Swal.fire({
+                title: 'ยืนยันการเบิกกระดาษ',
+                html: `
+                <div class="text-left">
+                    <p><strong>ผู้เบิก:</strong> ${request.userName}</p>
+                    <p><strong>ประเภทกระดาษ:</strong> ${request.paperTypeName}</p>
+                    <p><strong>จำนวน:</strong> ${request.quantity}</p>
+                    <p class="text-red-600 mt-2">⚠️ การเบิกจะไม่สามารถยกเลิกได้</p>
+                </div>
+            `,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'ยืนยันการเบิก',
+                cancelButtonText: 'ยกเลิก',
+                confirmButtonColor: '#059669'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Update request status
+                    request.withdrawnStatus = 'Withdrawn';
+                    request.withdrawnDate = new Date().toISOString();
+                    request.withdrawnBy = currentUser;
+
+                    // Update paper stock (if tracking)
+                    updatePaperStock(request.paperTypeId, -request.quantity);
+
+                    saveToLocalStorage();
+
+                    // Send to Google Sheets
+                    const data = {
+                        action: 'updateWithdrawal',
+                        requestId: requestId,
+                        withdrawnStatus: 'Withdrawn',
+                        withdrawnDate: request.withdrawnDate,
+                        withdrawnBy: currentUser
+                    };
+
+                    sendToGoogleSheet(data, function (response) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'เบิกกระดาษสำเร็จ!',
+                            html: `
+                            <div class="text-left">
+                                <p><strong>ผู้เบิก:</strong> ${request.userName}</p>
+                                <p><strong>ประเภทกระดาษ:</strong> ${request.paperTypeName}</p>
+                                <p><strong>จำนวนที่เบิก:</strong> ${request.quantity}</p>
+                                <p><strong>วันที่เบิก:</strong> ${new Date().toLocaleDateString('th-TH')}</p>
+                                <p class="text-green-600 mt-2">✅ บันทึกการเบิกเรียบร้อยแล้ว</p>
+                            </div>
+                        `,
+                            confirmButtonText: 'ตกลง'
+                        });
+
+                        // Refresh current page data
+                        if (document.getElementById('approvalPage').classList.contains('hidden') === false) {
+                            loadApprovedRequests();
+                        }
+                        if (document.getElementById('reportPage').classList.contains('hidden') === false) {
+                            loadReportData();
+                        }
+                        updateDashboard();
+                    });
+                }
+            });
+        }
+
+        function updatePaperStock(paperTypeId, quantity) {
+            // Initialize paper stock if not exists
+            if (!localStorage.getItem('paperStock')) {
+                const initialStock = {};
+                paperTypes.forEach(type => {
+                    initialStock[type.id] = 1000; // Default stock
+                });
+                localStorage.setItem('paperStock', JSON.stringify(initialStock));
+            }
+
+            const paperStock = JSON.parse(localStorage.getItem('paperStock'));
+            if (paperStock[paperTypeId]) {
+                paperStock[paperTypeId] += quantity;
+                if (paperStock[paperTypeId] < 0) paperStock[paperTypeId] = 0;
+            }
+            localStorage.setItem('paperStock', JSON.stringify(paperStock));
+        }
+
+        function getPaperStock(paperTypeId) {
+            const paperStock = JSON.parse(localStorage.getItem('paperStock') || '{}');
+            return paperStock[paperTypeId] || 0;
+        }
+
+        function loadApprovedRequests() {
+            const container = document.getElementById('approvedRequestsList');
+            const approvedRequests = usageRequests.filter(req => req.status === 'Approved');
+
+            container.innerHTML = '';
+
+            if (approvedRequests.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-center py-8">ไม่มีคำขอที่อนุมัติแล้ว</p>';
+                return;
+            }
+
+            approvedRequests.forEach(request => {
+                const isWithdrawn = request.withdrawnStatus === 'Withdrawn';
+                const bgColor = isWithdrawn ? 'bg-green-50 border-green-200' : 'bg-blue-50 border-blue-200';
+
+                const requestDiv = document.createElement('div');
+                requestDiv.className = `${bgColor} border p-4 rounded-lg`;
+                requestDiv.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <p><strong>ผู้เบิก:</strong> ${request.userName}</p>
+                        <p><strong>แผนก:</strong> ${request.department}</p>
+                        <p><strong>ประเภทกระดาษ:</strong> ${request.paperTypeName}</p>
+                        <p><strong>จำนวน:</strong> ${request.quantity}</p>
+                    </div>
+                    <div>
+                        <p><strong>วันที่ขอ:</strong> ${new Date(request.requestDate).toLocaleDateString('th-TH')}</p>
+                        <p><strong>วันที่อนุมัติ:</strong> ${new Date(request.approvedDate).toLocaleDateString('th-TH')}</p>
+                        <p><strong>อนุมัติโดย:</strong> ${request.approvedBy}</p>
+                        ${request.withdrawnDate ? `<p><strong>วันที่เบิก:</strong> ${new Date(request.withdrawnDate).toLocaleDateString('th-TH')}</p>` : ''}
+                    </div>
+                    <div class="flex flex-col justify-center">
+                        ${isWithdrawn ?
+                        `<div class="text-center">
+                                <span class="inline-block bg-green-500 text-white px-4 py-2 rounded-full text-sm font-semibold">
+                                    ✅ เบิกแล้ว
+                                </span>
+                                <p class="text-xs text-gray-600 mt-1">เบิกโดย: ${request.withdrawnBy}</p>
+                            </div>` :
+                        `<button onclick="withdrawPaper(${request.id})" class="btn-success text-white px-6 py-3 rounded-lg hover:opacity-90 transition-all font-semibold">
+                                📦 เบิกกระดาษ
+                            </button>`
+                    }
+                    </div>
+                </div>
+            `;
+                container.appendChild(requestDiv);
+            });
+        }
+
+        function loadPaperTypesForDropdown() {
+            const select = document.getElementById('requestPaperType');
+            if (!select) return;
+
+            select.innerHTML = '<option value="">เลือกประเภทกระดาษ</option>';
+
+            console.log('Loading paper types:', paperTypes);
+
+            paperTypes.forEach(type => {
+                const option = document.createElement('option');
+                option.value = type.id;
+                option.textContent = type.name;
+                select.appendChild(option);
+            });
+        }
+        function loadStockPaperDropdown() {
+            const callback = 'cb_' + Math.random().toString(36).substring(2);
+            window[callback] = function (res) {
+                // DEBUG: ดูข้อมูลใน console
+                console.log('API Response:', res);
+
+                const select = document.getElementById('stockPaperType');
+                select.innerHTML = '<option value="">-- เลือกประเภทกระดาษ --</option>';
+
+                if (res.success && res.data) {
+                    // คีย์ต้องตรงกับ header ในชีท
+                    res.data.forEach(row => {
+                        select.innerHTML += `<option value="${row.ID}">${row.Name}</option>`;
+                    });
+                }
+                delete window[callback];
+            };
+            const script = document.createElement('script');
+            script.src = GOOGLE_SCRIPT_URL + '?action=read&sheet=PaperTypes&callback=' + callback;
+            document.body.appendChild(script);
+        }
+
+
+
+        function submitUsageRequest(event) {
+            event.preventDefault();
+            // อ่านค่าจากฟอร์ม
+            const userName = document.getElementById('requestUserName').value;
+            const department = document.getElementById('requestDepartment').value;
+            const paperTypeId = document.getElementById('requestPaperType').value;
+            const quantity = document.getElementById('requestQuantity').value;
+            const note = document.getElementById('requestNote').value;
+
+            // หา user object จาก currentUser (login)
+            const user = users.find(u => u.username === currentUser);
+
+            if (!user) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'ไม่พบข้อมูลผู้ใช้',
+                    text: 'กรุณา login ใหม่'
+                });
+                return;
+            }
+            if (!paperTypeId) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'กรุณาเลือกประเภทกระดาษ',
+                    text: 'โปรดเลือกประเภทกระดาษที่ต้องการเบิก'
+                });
+                return;
+            }
+            if (!quantity || quantity <= 0) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'กรุณาระบุจำนวน',
+                    text: 'โปรดระบุจำนวนที่ต้องการเบิก (ต้องมากกว่า 0)'
+                });
+                return;
+            }
+            const paperType = paperTypes.find(p => String(p.id) === String(paperTypeId));
+            if (!paperType) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'ไม่พบข้อมูลประเภทกระดาษ',
+                    text: 'กรุณาเลือกประเภทกระดาษใหม่'
+                });
+                return;
+            }
+
+            // แสดง loading
+            Swal.fire({
+                title: 'กำลังส่งคำขอเบิก...',
+                text: 'กรุณารอสักครู่',
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                didOpen: () => Swal.showLoading()
+            });
+
+            const newRequest = {
+                id: Date.now(),
+                userId: user.id,
+                userName: user.name,
+                department: user.department,
+                paperTypeId: paperType.id,
+                paperTypeName: paperType.name,
+                quantity: parseInt(quantity),
+                note: note || '',
+                status: 'Pending',
+                requestDate: new Date().toISOString(),
+                requestedBy: currentUser
+            };
+
+            // Save to localStorage
+            usageRequests.push(newRequest);
+            saveToLocalStorage();
+
+            // Prepare data for Google Sheets
+            const data = {
+                action: 'addUsageRequest',
+                userId: user.id,
+                userName: user.name,
+                department: user.department,
+                paperTypeId: paperType.id,
+                paperTypeName: paperType.name,
+                quantity: quantity,
+                note: note || '',
+                status: 'Pending',
+                requestDate: newRequest.requestDate,
+                requestedBy: currentUser
+            };
+
+            sendToGoogleSheet(data, function (response) {
+                if (response && response.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'ส่งคำขอเบิกสำเร็จ!',
+                        html: `<div class="text-left">
+                        <p><strong>ตัวแทนผู้เบิก:</strong> ${user.name}</p>
+                        <p><strong>แผนก:</strong> ${user.department}</p>
+                        <p><strong>ประเภทกระดาษ:</strong> ${paperType.name}</p>
+                        <p><strong>จำนวน:</strong> ${quantity}</p>
+                        <p><strong>สถานะ:</strong> <span class="text-yellow-600">รออนุมัติ</span></p>
+                    </div>`,
+                        confirmButtonText: 'ตกลง'
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'บันทึกในระบบสำเร็จ',
+                        text: 'คำขอถูกบันทึกในระบบแล้ว แต่ไม่สามารถส่งไป Google Sheets ได้',
+                        confirmButtonText: 'ตกลง'
+                    });
+                }
+
+                clearUsageForm();
+            });
+        }
+
+        function clearUsageForm() {
+            document.getElementById('requestUser').value = '';
+            document.getElementById('requestDepartment').value = '';
+            document.getElementById('requestPaperType').value = '';
+            document.getElementById('requestQuantity').value = '';
+            document.getElementById('requestNote').value = '';
+        }
+
+        function loadUsersList() {
+            const container = document.getElementById('usersList');
+            container.innerHTML = '';
+
+            users.forEach(user => {
+                const userDiv = document.createElement('div');
+                userDiv.className = 'bg-gray-50 p-3 rounded-lg flex justify-between items-center';
+                userDiv.innerHTML = `
+            <div>
+                <p class="font-semibold">${user.name}</p>
+                <p class="text-xs text-gray-400">username: <span class="font-mono">${user.username || '-'}</span></p>
+                <p class="text-sm text-gray-600">${user.department} - ${user.role}</p>
+            </div>
+            <div class="space-x-2">
+                <button onclick="editUser(${user.id})" class="text-blue-600 hover:text-blue-800 text-sm">แก้ไข</button>
+                <button onclick="deleteUser(${user.id})" class="text-red-600 hover:text-red-800 text-sm">ลบ</button>
+            </div>
+        `;
+                container.appendChild(userDiv);
+            });
+        }
+
+
+        function loadUsersFromSheet(callback) {
+            loadFromGoogleSheet('Users', function (response) {
+                if (response && response.data) {
+                    users = response.data.map(item => ({
+                        id: item.ID,
+                        name: item.Name,
+                        department: item.Department,
+                        role: item.Role,
+                        username: item.Username || '',
+                        passwordHash: item.Password || '',   // << Map เป็น passwordHash !!
+                        createdAt: item.CreatedAt,
+                    }));
+                    saveToLocalStorage();
+                    if (callback) callback();
+                    // ...loadUsersList(); // อย่าเรียกตรงนี้ ถ้าใช้ callback แล้ว
+                }
+            });
+        }
+
+
+
+
+
+
+        function editUser(userId) {
+            const user = users.find(u => u.id === userId);
+            if (!user) return;
+
+            Swal.fire({
+                title: 'แก้ไขข้อมูลผู้ใช้งาน',
+                html: `
+      <input id="editName" class="swal2-input" placeholder="ชื่อ-นามสกุล" value="${user.name}">
+      <input id="editDepartment" class="swal2-input" placeholder="แผนก" value="${user.department}">
+      <select id="editRole" class="swal2-input">
+          <option value="User" ${user.role === 'User' ? 'selected' : ''}>User</option>
+          <option value="Admin" ${user.role === 'Admin' ? 'selected' : ''}>Admin</option>
+      </select>
+    `,
+                showCancelButton: true,
+                confirmButtonText: 'บันทึก',
+                cancelButtonText: 'ยกเลิก',
+                preConfirm: () => {
+                    const name = document.getElementById('editName').value;
+                    const department = document.getElementById('editDepartment').value;
+                    const role = document.getElementById('editRole').value;
+
+                    if (!name || !department || !role) {
+                        Swal.showValidationMessage('กรุณากรอกข้อมูลให้ครบถ้วน');
+                        return false;
+                    }
+                    return { name, department, role };
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // อัปเดต local
+                    user.name = result.value.name;
+                    user.department = result.value.department;
+                    user.role = result.value.role;
+
+                    saveToLocalStorage();
+                    loadUsersList();
+
+                    // === อัปเดต Google Sheet ===
+                    sendToGoogleSheet({
+                        action: 'updateUser',
+                        id: user.id,
+                        name: user.name,
+                        department: user.department,
+                        role: user.role
+                    }, function (response) {
+                        if (response && response.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'แก้ไขสำเร็จ',
+                                text: 'ข้อมูลผู้ใช้งานถูกแก้ไขเรียบร้อยแล้ว'
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'เกิดข้อผิดพลาด',
+                                text: 'ไม่สามารถอัปเดต Google Sheets ได้'
+                            });
+                        }
+                    });
+                }
+            });
+        }
+
+
+        function deleteUser(userId) {
+            Swal.fire({
+                title: 'ยืนยันการลบ',
+                text: 'คุณต้องการลบผู้ใช้งานนี้หรือไม่?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'ลบ',
+                cancelButtonText: 'ยกเลิก'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // ลบที่ Google Sheets ก่อน
+                    sendToGoogleSheet({
+                        action: 'deleteUser',
+                        id: userId
+                    }, function (response) {
+                        if (response && response.success) {
+                            // โหลด users ใหม่จาก Google Sheet
+                            loadUsersFromSheet();
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'ลบสำเร็จ',
+                                text: 'ผู้ใช้งานถูกลบเรียบร้อยแล้ว'
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'เกิดข้อผิดพลาด',
+                                text: 'ไม่สามารถลบจาก Google Sheets ได้'
+                            });
+                        }
+                    });
+                }
+            });
+        }
+
+
+
+        // Approval functions
+        function loadPendingRequests() {
+            const container = document.getElementById('pendingRequestsList');
+
+            // Debug: แสดงข้อมูลทั้งหมดที่โหลดมา
+            console.log('== usageRequests ==', usageRequests);
+
+            // กรองเฉพาะที่รออนุมัติ (robust: กันกรณี status มีช่องว่าง, เคสเล็ก/ใหญ่, null, undefined)
+            const pendingRequests = usageRequests.filter(
+                req => typeof req.status === 'string' && req.status.trim().toLowerCase() === 'pending'
+            );
+
+            // Debug: ดูว่าค่าที่กรองได้มีอะไรบ้าง
+            console.log('== pendingRequests ==', pendingRequests);
+
+            container.innerHTML = '';
+            if (pendingRequests.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-center py-8">ไม่มีคำขอที่รออนุมัติ</p>';
+                return;
+            }
+
+            // วนลูปสร้าง HTML สำหรับแต่ละ request ที่รออนุมัติ
+            pendingRequests.forEach(request => {
+                const requestDiv = document.createElement('div');
+                requestDiv.className = 'bg-yellow-50 border border-yellow-200 p-4 rounded-lg mb-4';
+
+                requestDiv.innerHTML = `
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <p><strong>ผู้เบิก:</strong> ${request.userName}</p>
+                    <p><strong>แผนก:</strong> ${request.department}</p>
+                    <p><strong>ประเภทกระดาษ:</strong> ${request.paperTypeName}</p>
+                    <p><strong>จำนวน:</strong> ${request.quantity}</p>
+                </div>
+                <div>
+                    <p><strong>วันที่ขอ:</strong> ${new Date(request.requestDate).toLocaleDateString('th-TH')}</p>
+                    <p><strong>หมายเหตุ:</strong> ${request.note || '-'}</p>
+                    <div class="mt-3 space-x-2">
+                        <button onclick="approveRequest('${request.id}')" class="btn-success text-white px-4 py-2 rounded hover:opacity-90">
+                            อนุมัติ
+                        </button>
+                        <button onclick="rejectRequest('${request.id}')" class="btn-danger text-white px-4 py-2 rounded hover:opacity-90">
+                            ไม่อนุมัติ
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+                container.appendChild(requestDiv);
+            });
+        }
+
+
+        function approveRequest(requestId) {
+            console.log('[DEBUG] Approve click! requestId=', requestId);
+            Swal.fire({
+                title: 'ยืนยันการอนุมัติ',
+                text: 'คุณต้องการอนุมัติคำขอนี้หรือไม่?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'อนุมัติ',
+                cancelButtonText: 'ยกเลิก'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const request = usageRequests.find(req => String(req.id) === String(requestId));
+                    if (request) {
+                        request.status = 'Approved';
+                        request.approvedBy = currentUser;
+                        request.approvedDate = new Date().toISOString();
+
+                        saveToLocalStorage();
+
+                        // อัปเดตกลับ Google Sheets
+                        sendToGoogleSheet({
+                            action: 'updateApproval',
+                            requestId: requestId,
+                            status: 'Approved',
+                            approvedBy: currentUser,
+                            approvedDate: request.approvedDate
+                        }, function (response) {
+                            if (response && response.success) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'อนุมัติสำเร็จ',
+                                    text: 'คำขอได้รับการอนุมัติเรียบร้อยแล้ว'
+                                }).then(() => {
+                                    loadUsageRequestsFromSheet(function () {
+                                        loadPendingRequests();
+                                        loadApprovedRequests();
+                                        updateDashboard();
+                                    });
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'เกิดข้อผิดพลาด',
+                                    text: 'ไม่สามารถอัปเดต Google Sheets ได้'
+                                });
+                            }
+                        });
+                    }
+                }
+            });
+        }
+
+
+        function rejectRequest(requestId) {
+            Swal.fire({
+                title: 'เหตุผลในการไม่อนุมัติ',
+                input: 'textarea',
+                inputPlaceholder: 'กรุณาระบุเหตุผล...',
+                showCancelButton: true,
+                confirmButtonText: 'ไม่อนุมัติ',
+                cancelButtonText: 'ยกเลิก',
+                inputValidator: (value) => {
+                    if (!value) {
+                        return 'กรุณาระบุเหตุผล';
+                    }
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const request = usageRequests.find(req => req.id === requestId);
+                    if (request) {
+                        request.status = 'Rejected';
+                        request.rejectedBy = currentUser;
+                        request.rejectedDate = new Date().toISOString();
+                        request.rejectionReason = result.value;
+
+                        saveToLocalStorage();
+                        loadPendingRequests();
+
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'บันทึกสำเร็จ',
+                            text: 'คำขอถูกปฏิเสธเรียบร้อยแล้ว'
+                        });
+                    }
+                }
+            });
+        }
+
+        // Report functions
+        function loadReportData() {
+            const statusFilter = document.getElementById('statusFilter').value;
+            const container = document.getElementById('reportData');
+
+            let filteredRequests = usageRequests;
+            if (statusFilter !== 'All') {
+                filteredRequests = usageRequests.filter(req => req.status === statusFilter);
+            }
+
+            // Create table
+            let tableHTML = `
+            <table class="min-w-full bg-white border border-gray-300">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-2 border-b text-left">วันที่ขอ</th>
+                        <th class="px-4 py-2 border-b text-left">ผู้เบิก</th>
+                        <th class="px-4 py-2 border-b text-left">แผนก</th>
+                        <th class="px-4 py-2 border-b text-left">ประเภทกระดาษ</th>
+                        <th class="px-4 py-2 border-b text-left">จำนวน</th>
+                        <th class="px-4 py-2 border-b text-left">สถานะอนุมัติ</th>
+                        <th class="px-4 py-2 border-b text-left">สถานะเบิก</th>
+                        <th class="px-4 py-2 border-b text-left">วันที่เบิก</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+            filteredRequests.forEach(request => {
+                const statusClass = request.status === 'Approved' ? 'text-green-600' :
+                    request.status === 'Rejected' ? 'text-red-600' : 'text-yellow-600';
+
+                const withdrawnClass = request.withdrawnStatus === 'Withdrawn' ? 'text-green-600' : 'text-gray-400';
+                const withdrawnText = request.withdrawnStatus === 'Withdrawn' ? '✅ เบิกแล้ว' : '-';
+                const withdrawnDate = request.withdrawnDate ? new Date(request.withdrawnDate).toLocaleDateString('th-TH') : '-';
+
+                tableHTML += `
+                <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-2 border-b">${new Date(request.requestDate).toLocaleDateString('th-TH')}</td>
+                    <td class="px-4 py-2 border-b">${request.userName}</td>
+                    <td class="px-4 py-2 border-b">${request.department}</td>
+                    <td class="px-4 py-2 border-b">${request.paperTypeName}</td>
+                    <td class="px-4 py-2 border-b">${request.quantity}</td>
+                    <td class="px-4 py-2 border-b ${statusClass}">${request.status}</td>
+                    <td class="px-4 py-2 border-b ${withdrawnClass}">${withdrawnText}</td>
+                    <td class="px-4 py-2 border-b">${withdrawnDate}</td>
+                </tr>
+            `;
+            });
+
+            tableHTML += '</tbody></table>';
+            container.innerHTML = tableHTML;
+
+            // Update chart
+            updateReportChart(filteredRequests);
+        }
+
+        function updateReportChart(requests) {
+            const ctx = document.getElementById('reportChart').getContext('2d');
+            // FIX: ป้องกัน error destroy is not a function
+            if (window.reportChart && typeof window.reportChart.destroy === "function") {
+                window.reportChart.destroy();
+            }
+
+            const paperTypeData = {};
+            requests.forEach(request => {
+                if (request.withdrawnStatus === 'Withdrawn') {
+                    if (!paperTypeData[request.paperTypeName]) {
+                        paperTypeData[request.paperTypeName] = 0;
+                    }
+                    paperTypeData[request.paperTypeName] += request.quantity;
+                }
+            });
+
+            window.reportChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(paperTypeData),
+                    datasets: [{
+                        label: 'จำนวนที่เบิกจริง',
+                        data: Object.values(paperTypeData),
+                        backgroundColor: [
+                            'rgba(59, 130, 246, 0.8)',
+                            'rgba(16, 185, 129, 0.8)',
+                            'rgba(245, 158, 11, 0.8)',
+                            'rgba(239, 68, 68, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgba(59, 130, 246, 1)',
+                            'rgba(16, 185, 129, 1)',
+                            'rgba(245, 158, 11, 1)',
+                            'rgba(239, 68, 68, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true, // FIXED
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        }
+
+
+        // Report functions
+
+
+        function loadUsageRequestsFromSheet(callback) {
+            loadFromGoogleSheet('UsageRequests', function (response) {
+                if (response && response.data) {
+                    usageRequests = response.data.map(item => ({
+                        id: item.ID,
+                        userId: item.UserID,             // U ใหญ่ I ใหญ่ D ใหญ่ (OK)
+                        userName: item.UserName,         // U ใหญ่ N ใหญ่ (OK)
+                        department: item.Department,
+                        paperTypeId: item.PaperTypeID,
+                        paperTypeName: item.PaperTypeName,
+                        quantity: parseInt(item.Quantity || 0),
+                        note: item.Note,
+                        status: (item.Status || '').trim(), // อย่าแปลงเป็น toLowerCase ตรงนี้! เก็บตรงๆก่อน
+                        requestDate: item.RequestDate,
+                        requestedBy: item.RequestedBy,
+                        approvedBy: item.ApprovedBy,
+                        approvedDate: item.ApprovedDate,
+                        rejectedBy: item.RejectedBy,
+                        rejectedDate: item.RejectedDate,
+                        rejectionReason: item.RejectionReason,
+                        withdrawnStatus: item.WithdrawnStatus,
+                        withdrawnDate: item.WithdrawnDate,
+                        withdrawnBy: item.WithdrawnBy,
+                    }));
+
+
+
+                    console.log("Usage raw data from GoogleSheet", response.data[0]);// <--- เพิ่มตรงนี้
+                    saveToLocalStorage();
+                    if (callback) callback();
+                }
+            });
+        }
+
+
+        function updateDashboard() {
+            // สรุปจำนวนรออนุมัติ
+            const pending = usageRequests.filter(req => req.status === 'Pending').length;
+            document.getElementById('pendingRequests').textContent = pending;
+
+            // สรุปจำนวนที่เบิกวันนี้
+            const today = new Date().toISOString().slice(0, 10); // 'YYYY-MM-DD'
+            const todayUsage = usageRequests.filter(
+                req => req.withdrawnStatus === 'Withdrawn' && req.withdrawnDate && req.withdrawnDate.startsWith(today)
+            ).reduce((sum, req) => sum + (parseInt(req.quantity) || 0), 0);
+            document.getElementById('todayUsage').textContent = todayUsage;
+
+            // ==== ตรงนี้คือจุดสำคัญ แก้ไขให้ดึงยอดจาก Google Sheet PaperStock สดๆ ====
+            loadFromGoogleSheet('PaperStock', function (res) {
+                let totalStock = 0;
+                if (res.success && res.data) {
+                    res.data.forEach(row => {
+                        totalStock += Number(row.Quantity || 0);
+                    });
+                }
+                document.getElementById('remainingPaper').textContent = totalStock;
+                console.log('todayUsage =', todayUsage, ', totalStock =', totalStock, ', pending =', pending);
+            });
+
+            // อัปเดทกราฟ
+            updateDashboardChart();
+            showDashboardNews();
+
+        }
+
+        // Report functions
+        function updateDashboardChart() {
+            // เตรียม ctx ของ Dashboard
+            const ctx = document.getElementById('paperTypeChart').getContext('2d');
+            if (window.dashboardChart && typeof window.dashboardChart.destroy === "function") {
+                window.dashboardChart.destroy();
+            }
+
+            // นับจำนวนเบิกตามประเภท (ทุกสถานะ หรือจะเลือกเฉพาะ Withdrawn ตามต้องการ)
+            const paperTypeData = {};
+            usageRequests.forEach(request => {
+                // แนะนำเลือก filter เฉพาะที่เบิกแล้ว (Withdrawn) หรือ Approved+Withdrawn
+                if (request.withdrawnStatus === 'Withdrawn') {
+                    if (!paperTypeData[request.paperTypeName]) {
+                        paperTypeData[request.paperTypeName] = 0;
+                    }
+                    paperTypeData[request.paperTypeName] += request.quantity;
+                }
+            });
+
+            window.dashboardChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(paperTypeData),
+                    datasets: [{
+                        label: 'จำนวนเบิกจริง (Dashboard)',
+                        data: Object.values(paperTypeData),
+                        backgroundColor: [
+                            'rgba(59, 130, 246, 0.8)',
+                            'rgba(16, 185, 129, 0.8)',
+                            'rgba(245, 158, 11, 0.8)',
+                            'rgba(239, 68, 68, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgba(59, 130, 246, 1)',
+                            'rgba(16, 185, 129, 1)',
+                            'rgba(245, 158, 11, 1)',
+                            'rgba(239, 68, 68, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        }
+        // อ่านข่าว
+        function submitNewsForm(event) {
+            event.preventDefault();
+            const title = document.getElementById('newsTitle').value.trim();
+            const content = document.getElementById('newsContent').value.trim();
+
+            if (!title || !content) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'กรุณากรอกข้อมูล',
+                    text: 'หัวข้อข่าวและเนื้อหาต้องไม่ว่าง'
+                });
+                return;
+            }
+            addNews(title, content);
+        }
+
+        function addNews(title, content) {
+            const callback = 'cb_' + Math.random().toString(36).substring(2);
+            window[callback] = function (res) {
+                delete window[callback];
+                if (res.success) {
+                    Swal.fire('สำเร็จ', 'เพิ่มข่าวแล้ว', 'success');
+                    document.getElementById('newsTitle').value = '';
+                    document.getElementById('newsContent').value = '';
+                    loadNews(); // โหลดรายการข่าวใหม่
+                } else {
+                    Swal.fire('ผิดพลาด', 'บันทึกไม่สำเร็จ', 'error');
+                }
+            };
+            const script = document.createElement('script');
+            script.src = GOOGLE_SCRIPT_URL + '?action=addNews'
+                + '&title=' + encodeURIComponent(title)
+                + '&content=' + encodeURIComponent(content)
+                + '&callback=' + callback;
+            document.body.appendChild(script);
+        }
+
+        function loadNews() {
+            const callback = 'cb_' + Math.random().toString(36).substring(2);
+            window[callback] = function (res) {
+                delete window[callback];
+                const newsListDiv = document.getElementById('newsList');
+                newsListDiv.innerHTML = '';
+                if (res.success && res.data && res.data.length > 0) {
+                    res.data.reverse().forEach(item => {
+                        newsListDiv.innerHTML += `<div class="border-b py-2">
+                <div class="font-semibold">${item.title}</div>
+                <div class="text-xs text-gray-600">${new Date(item.date).toLocaleString('th-TH')}</div>
+                <div>${item.content}</div>
+            </div>`;
+                    });
+                } else {
+                    newsListDiv.innerHTML = '<div class="text-gray-400 py-3">ยังไม่มีข่าว</div>';
+                }
+            };
+            const script = document.createElement('script');
+            script.src = GOOGLE_SCRIPT_URL + '?action=getNews&callback=' + callback;
+            document.body.appendChild(script);
+        }
+
+
+
+        // อ่าน stock
+
+        // สมมติ stockMap = { "1234": 50, "5678": 90 }
+        function loadCurrentStock() {
+            loadFromGoogleSheet('PaperStock', function (res) {
+                const stockDiv = document.getElementById('currentStockList');
+                stockDiv.innerHTML = '';
+                let stockMap = {};
+                if (res.success && res.data) {
+                    res.data.forEach(row => {
+                        // ใช้ PaperTypeId ให้ตรงหัวคอลัมน์
+                        stockMap[String(row.PaperTypeId)] = Number(row.Quantity || 0);
+                    });
+                }
+
+                if (!paperTypes || paperTypes.length === 0) {
+                    stockDiv.innerHTML = '<div class="text-gray-400 py-2">ไม่มีข้อมูลประเภทกระดาษ</div>';
+                    return;
+                }
+
+                // Render รายการ stock
+                paperTypes.forEach(pt => {
+                    const qty = stockMap[String(pt.id)] !== undefined ? stockMap[String(pt.id)] : 0;
+                    stockDiv.innerHTML += `
+                <div class="flex justify-between border-b py-2">
+                    <div>${pt.name}</div>
+                    <div class="font-bold text-blue-700">${qty}</div>
+                </div>
+            `;
+                });
+            });
+        }
+
+
+
+
+        // เพิ่ม/อัปเดต stock
+        function addOrUpdateStock(paperTypeId, qty) {
+            const callback = 'cb_' + Math.random().toString(36).substring(2);
+            window[callback] = function (res) {
+                // res.success
+                console.log(res);
+                delete window[callback];
+            };
+            const script = document.createElement('script');
+            script.src = GOOGLE_SCRIPT_URL + '?action=addOrUpdatePaperStock'
+                + '&paperTypeId=' + encodeURIComponent(paperTypeId)
+                + '&quantity=' + encodeURIComponent(qty)
+                + '&callback=' + callback;
+            document.body.appendChild(script);
+        }
+        function loadCurrentStockList() {
+            const container = document.getElementById('currentStockList');
+            if (!container) return;
+
+            // โหลด paperTypes กับ stock
+            let stock = {};
+            if (localStorage.getItem('paperStock')) {
+                stock = JSON.parse(localStorage.getItem('paperStock'));
+            }
+            // สมมุติ paperTypes โหลดมาพร้อมแล้ว (อาจต้อง sync กับ Google Sheet ให้ตรง)
+
+            // แสดงแต่ละประเภท
+            let html = '<table class="min-w-full text-left"><thead><tr><th>ประเภทกระดาษ</th><th>คงเหลือ</th></tr></thead><tbody>';
+            paperTypes.forEach(type => {
+                html += `<tr>
+            <td>${type.name}</td>
+            <td>${stock[type.id] || 0}</td>
+        </tr>`;
+            });
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+
+        function showDashboardNews() {
+            const callback = 'cb_' + Math.random().toString(36).substring(2);
+            window[callback] = function (res) {
+                delete window[callback];
+                const dashboardNewsDiv = document.getElementById('dashboardNews');
+                if (!dashboardNewsDiv) return;
+
+                dashboardNewsDiv.innerHTML = '';
+                if (res.success && res.data && res.data.length > 0) {
+                    // เอา 2 ข่าวล่าสุด
+                    res.data.slice(-2).reverse().forEach(item => {
+                        dashboardNewsDiv.innerHTML += `
+                    <div class="bg-blue-50 p-3 rounded-lg mb-2">
+                        <p class="text-sm text-blue-800">📢 ${item.title}</p>
+                        <div class="text-xs text-gray-600">${new Date(item.date).toLocaleString('th-TH')}</div>
+                    </div>`;
+                    });
+                }
+            };
+            const script = document.createElement('script');
+            script.src = GOOGLE_SCRIPT_URL + '?action=getNews&callback=' + callback;
+            document.body.appendChild(script);
+        }
+
+        function addPaperStock(event) {
+            event.preventDefault();
+
+            const paperTypeId = document.getElementById('stockPaperType').value;
+            const qty = document.getElementById('stockChangeAmount').value;
+
+            if (!paperTypeId || !qty) {
+                Swal.fire('กรุณาเลือกประเภทกระดาษและใส่จำนวน');
+                return;
+            }
+
+            const callback = 'cb_' + Math.random().toString(36).substring(2);
+            window[callback] = function (res) {
+                delete window[callback];
+                if (res.success) {
+                    Swal.fire('สำเร็จ', 'อัปเดตจำนวนคงเหลือเรียบร้อย', 'success');
+                    document.getElementById('stockChangeAmount').value = "";
+                    // โหลดข้อมูลคงเหลือใหม่
+                    loadCurrentStock();
+                } else {
+                    Swal.fire('ผิดพลาด', 'ไม่สามารถอัปเดตได้', 'error');
+                }
+            };
+
+            const script = document.createElement('script');
+            script.src = GOOGLE_SCRIPT_URL
+                + '?action=addOrUpdatePaperStock'
+                + '&paperTypeId=' + encodeURIComponent(paperTypeId)
+                + '&quantity=' + encodeURIComponent(qty)
+                + '&callback=' + callback;
+            document.body.appendChild(script);
+
+        }
+        console.log('paperTypes', paperTypes);
+
+        function loadPaperTypesFromSheet(callback) {
+            loadFromGoogleSheet('PaperTypes', function (res) {
+                if (res.success && res.data) {
+                    // แปลงข้อมูลจาก Google Sheet (ชื่อ key ต้องตรง)
+                    paperTypes = res.data.map(row => ({
+                        id: row.ID,
+                        name: row.Name,
+                        description: row.Description,
+                        createdAt: row.CreatedAt
+                    }));
+                    saveToLocalStorage();
+                    if (callback) callback();   // render หรือ callback อื่นๆ
+                }
+            });
+        }
+        // เรียกใช้ทุกครั้งที่เปิดหน้า manageStockPage
+        function openManageStockPage() {
+            // 1. โหลดประเภทกระดาษ (async)
+            loadPaperTypesFromSheet(function () {
+                // 2. เมื่อโหลดเสร็จค่อย render dropdown + ยอดคงเหลือ
+                renderStockDropdown();
+                loadCurrentStock();
+            });
+        }
+
+        function renderStockDropdown() {
+            const select = document.getElementById('stockPaperType');
+            select.innerHTML = '<option value="">-- เลือกประเภทกระดาษ --</option>';
+            paperTypes.forEach(pt => {
+                select.innerHTML += `<option value="${pt.id}">${pt.name}</option>`;
+            });
+        }
+        async function hashPassword(password) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(password);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            return hashHex;
+        }
+
+        // KEEP ONLY THIS VERSION (with password hash)
+        async function addUser(event) {
+            event.preventDefault();
+            const name = document.getElementById('userName').value;
+            const department = document.getElementById('userDepartment').value;
+            const role = document.getElementById('userRole').value;
+            const username = document.getElementById('userUsername').value;
+            const password = document.getElementById('userPassword').value;
+
+            const passwordHash = await hashPassword(password);
+
+            const newUser = {
+                id: Date.now(),
+                name,
+                department,
+                role,
+                username,
+                passwordHash,
+                createdAt: new Date().toISOString()
+            };
+
+            users.push(newUser);
+            saveToLocalStorage();
+
+            // Send to Google Sheet
+            const data = {
+                action: 'addUser',
+                name,
+                department,
+                role,
+                username,
+                passwordHash,
+                createdAt: newUser.createdAt
+            };
+
+            sendToGoogleSheet(data, function (response) {
+                if (response && response.success) {
+                    Swal.fire({ icon: 'success', title: 'เพิ่มผู้ใช้งานสำเร็จ', text: 'บันทึกเรียบร้อย' });
+                }
+            });
+        }
+        function loadDataFast(sheet, key, updateUI) {
+            // เอาข้อมูลจาก cache ขึ้นมาก่อน (UI เห็นทันที)
+            const cached = localStorage.getItem(key);
+            if (cached) updateUI(JSON.parse(cached));
+
+            // fetch ข้อมูลสดจาก Google Sheet (background)
+            loadFromGoogleSheet(sheet, function (res) {
+                if (res && res.data) {
+                    localStorage.setItem(key, JSON.stringify(res.data));
+                    updateUI(res.data); // อัพเดตหน้าจอใหม่
+                }
+            });
+        }
+
+
+        function saveCache(key, data) {
+            localStorage.setItem(key, JSON.stringify({ ts: Date.now(), data }));
+        }
+        function loadCache(key, maxAge = 30000) {
+            const item = localStorage.getItem(key);
+            if (!item) return null;
+            const { ts, data } = JSON.parse(item);
+            if (Date.now() - ts > maxAge) return null;
+            return data;
+        }
+
+        function autofillUserInfo() {
+            const user = users.find(u => u.username === currentUser);
+            if (user) {
+                document.getElementById('requestUserName').value = user.name;
+                document.getElementById('requestDepartment').value = user.department;
+            }
+        }
+
+
+
+
+
+
+        // ---- END ----
+    </script>
+</body>
+
+</html>
